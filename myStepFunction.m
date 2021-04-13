@@ -30,7 +30,7 @@ soc = State(4);
 time = State(5);
 
 bprice = 2;
-cprice = 1;
+cprice = 2;
 
 %Calculate PG(t)
 u = Action*Crate;
@@ -43,18 +43,14 @@ time = time + 1;
 
 
 
-if(Action == 1)
-        soc = soc + deltat*Crate;
-end
-if(Action == -1)
-    soc = soc + deltat*Drate;
-end
+% if(Action == 1)
+%         soc = soc + deltat*Crate;
+% end
+% if(Action == -1)
+%     soc = soc + deltat*Drate;
+% end
 
-State =[load; pv; wind; soc; time];
-LoggedSignals.State = State;
 
-%Transform state to observation.
-NextObs = soc;
 
 %Check terminal condition
 X = time;
@@ -64,9 +60,10 @@ IsDone = X>=24;
 
 %Get Reward
 if Action == 1
-    if soc >= 100
+    if soc >= 80
         Reward = -10;
     else
+        soc = soc + deltat*Crate;
         Reward = -PG*bprice;
     end
 end
@@ -74,13 +71,19 @@ if Action == 0
     Reward = 0;
 end
 if Action == -1
-    if soc >= 20
+    if soc <= 30
         Reward = -10;
     else
+        soc = soc + deltat*Drate;
         Reward = PG*cprice;
     end
 end
-    
+
+State =[load; pv; wind; soc; time];
+LoggedSignals.State = State;
+
+%Transform state to observation.
+NextObs = soc;
         
 
 end
